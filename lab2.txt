@@ -1,0 +1,61 @@
+Two types of Memory on board the K70 microcontroller
+	1. RAM - random access memory -> static RAM -> made up of flip-flops and does not need to be refreshed. RAM can be read and written to at any time - it is the place where variables are stored, as well as the stack and the heap.//not used.
+
+	2. NVM - non-volatile memory -> Is based on Flash technology. Flash is a memory technology that allows for bulk erasure, random writing, fast read access, and dense implementation (small silicon area). 
+
+There are 2 styles of FlaSh memory used in K70 family of MCUs.
+	1. Program Flash Memory -> consists of large blocks of memory - it normally holds the program code and constants.
+	2. FlexNVM -> this memory has the capability to emulate electrically erasable programmable read only memory (EEPROM) 
+
+In the Tower Board MCU MK70FN1M0VMJ12 -> We only have "Program Flash Memory" -> we will store our non-volatile variables in a flash block that we know will not be used by our program (our program is small so it leaves plenty of "Program Flash" available for data)
+
+The flash can be read just like normal RAM - no specified procedures is needed. However unlike RAM, when writing to the FLASH a special procedure is required.
+
+//Writing to the flash
+Some of the tasks needed to write to the memory are:
+	1.applying high programming voltage to a particular row
+	2. selecting  particular cell
+	3. pulsing the memory etc
+All these tasks are carried out by an on-chip state machine that hides the complexity of this writing process.
+
+All we have to do is interact with a few control registers to be able to write to the flash.
+
+//COMMAND INTERFACE
+
+FSTAT -> Flash Status -> status register to indicate the state-machine status
+
+FCNFG -> Flash Configuration-> a configuration register used to allow interrupts to be generated under certain conditions.
+
+FSEC -> Flash Security -> a read only security register used to indicate the state of the built-in security features such as 						mass erase enable/disable
+
+FOPT -> Flash Option -> a read only register used to indicate the flash options applied at boot time, such as whether to 						boot into low-power mode.
+
+FCCOB0 -> Flash common command object registers -> B- twelve registers that hold the flash interface's command, address, 						data and other parameters associated with a particular Flash Operation. 
+.
+.		(12 Registers)
+.
+FCCOBB
+
+<-------A complete description of the Flash memory module can be found in Chapter 30 of Freescale’s K70 Sub-Family Reference Manual.--------->
+
+All K70 parts have "PROGRAM FLASH MEMORY" in the range 0X0000_0000 -> 0X0007_FFFF.
+Memory starting address 0x0000_0000 -> Block 0 -> "vector table" that is used by NVIC (Nested Vectored Interrupt Controller) to get the initial stack pointer, initial program counter, and interrupt service routine addresses.
+
+We have chosen flash Block2 in thw other "bank" to store our non-volatile data.
+
+Inside each block the Flash Memory is further divided into SECTORS, which is the smallest unit that can be earased. 
+
+One aspct of Flash technology that should be remembered is that it must be ERASED before it is written to. FAILURE TO DO SO MAY DAMAGE THE FLASH ARRAY.
+
+
+
+
+//PETER//
+
+LEDs.c
+1. enable port A
+
+//Turn Leds ON//
+2. SIM_SCGC5 |= SIM_SCGC5_PORTA_MASK;
+
+
