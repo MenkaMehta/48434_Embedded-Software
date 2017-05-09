@@ -1,8 +1,6 @@
 # 48434_Embedded-Software
 # UTS Autumn 2017
 
-# 48434-embedded-software-labs
-
 ## Lab1:
 
   * Please refer to the Lab1 PDF
