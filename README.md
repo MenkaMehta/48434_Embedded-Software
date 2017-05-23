@@ -28,8 +28,25 @@
 
 ## Lab4:
 
-  * Please refer to the Lab3 PDF
+  * Please refer to the Lab4 PDF
+  * Status          : Incomplete
+  * Mark            : 6.2/8
+  * Processor       : MK70FN1M0VMJ12
+  * Microcontroller : Freescale Tower
+
+## Lab5:
+
+  * Please refer to the Lab5 PDF
   * Status          : Incomplete
   * Mark            : ?/8
   * Processor       : MK70FN1M0VMJ12
   * Microcontroller : Freescale Tower
+  
+## FINAL PROJECT:
+
+  * Please refer to the Project Description PDF
+  * Status          : Incomplete
+  * Mark            : ?/40
+  * Processor       : MK70FN1M0VMJ12
+  * Microcontroller : Freescale Tower
+    
