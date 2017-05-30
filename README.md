@@ -30,7 +30,7 @@
 
   * Please refer to the Lab4 PDF
   * Status          : Incomplete
-  * Mark            : 6.2/8
+  * Mark            : 6.2/8 - perfect-working-lab4
   * Processor       : MK70FN1M0VMJ12
   * Microcontroller : Freescale Tower
 
