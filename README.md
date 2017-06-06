@@ -30,9 +30,11 @@
 
   * Please refer to the Lab4 PDF
   * Status          : Incomplete
-  * Mark            : 6.2/8 - perfect-working-lab4
+  * Mark            : 6.2/8 
   * Processor       : MK70FN1M0VMJ12
   * Microcontroller : Freescale Tower
+  * //It works in polling mode and not interrupt mode
+  * //(I2C and accel ISR dont work)
 
 ## Lab5:
 
