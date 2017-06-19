@@ -1,9 +1,0 @@
-LABS FEEDBACKS TO WORK ON
-Lab1 7.6/8
-Lab2 7.7/8
-
-Lab2 Feedback
-
--delete function headers for c FILES
--baudrate shud be const not a define
--packet handle in the main
