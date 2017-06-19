@@ -56,6 +56,15 @@ typedef union
   } packetStruct;
 } TPacket;
 
+typedef enum
+{
+  INVERSE,
+  VERYINVERSE,
+  EXTREMELYINVERSE
+}TCharacteristic;
+
+TCharacteristic characteristic;
+
 #pragma pack(pop)
 
 #define Packet_Command     Packet.packetStruct.command
@@ -85,6 +94,11 @@ typedef union
 #define FLASH_READ_BYTE 0x8
 
 #define SET_TIME 0x0C
+
+#define CMD_CHARACTERISTIC 0x0E
+//#define GET_CHAR 1
+
+//#define SET_CHAR 2
 
 //Get or set the tower number
 #define TOWER_NUMBER 0x0B
@@ -124,6 +138,10 @@ typedef union
 #define TOWER_MODE_PAR1 0x01
 
 #define TOWER_READ_BYTE_COMM 0x08
+
+//Get the characteristic command
+#define CHAR_COMM 0x0e
+#define CHAR_PAR1 1
 
 extern TPacket Packet;
 

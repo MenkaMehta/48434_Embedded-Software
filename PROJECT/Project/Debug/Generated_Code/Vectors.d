@@ -11,7 +11,8 @@ Generated_Code/Vectors.o: ../Generated_Code/Vectors.c \
  C:/Users/12195032/Documents/PROJECT/Project/Generated_Code/IO_Map.h \
  C:/Users/12195032/Documents/PROJECT/Project/Sources/UART.h \
  C:/Users/12195032/Documents/PROJECT/Project/Sources/types.h \
- C:/Users/12195032/Documents/PROJECT/Project/Sources/PIT.h
+ C:/Users/12195032/Documents/PROJECT/Project/Sources/PIT.h \
+ C:/Users/12195032/Documents/PROJECT/Project/Sources/FTM.h
 
 ../Generated_Code/Cpu.h:
 
@@ -42,3 +43,5 @@ C:/Users/12195032/Documents/PROJECT/Project/Sources/UART.h:
 C:/Users/12195032/Documents/PROJECT/Project/Sources/types.h:
 
 C:/Users/12195032/Documents/PROJECT/Project/Sources/PIT.h:
+
+C:/Users/12195032/Documents/PROJECT/Project/Sources/FTM.h:

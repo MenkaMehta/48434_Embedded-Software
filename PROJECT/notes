@@ -1,0 +1,31 @@
+MENKA - PROJECT - DOR
+
+1. We are receiving unending sample voltages from the DAC.
+
+2. We have to take in 16 samples each 1.25ms for 50Hz.
+
+tsampling = 1/f-sampling/Nsampling
+1/50= 20ms /16 =1.25ms
+
+3. After taking 16 samples, find Vrms for each sampling done.
+
+4. From the Vrms find Irms
+Irms =Vrms/0.35 //350mV
+
+5. Take the Irms and caalculate the "time to trip" for the three given characteristics; INVERSE, VERYINVERSE AND EXTREMELYINVERSE
+//formulas are given with k-constants and alpha-constants
+
+6. So after getting the time to trip, from above:
+OUTPUT CHANNEL 2: "TRIPPING"
+
+Take the "time" put in the (PIT1_Set), PIT will start a timer that will countdown -- upto to zero.
+"The "trip" output is 0V when idle and 5V when active" (operated by any phase A,B,C)
+
+7. For the "timing output"
+The "Timing" output signal is to be 0V when Irms < 1.03 and 5V when Irms >= 1.03 (for any phase A,B,C)
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+The ratio is calculated by considering the 16bits +-10V thingy.
+
+you can take Irms which is (103 * 32767)/ 1000
+ 

@@ -25,6 +25,7 @@
 #include "Cpu.h"
 //#include "accel.h"
 
+
 /****************************************GLOBAL VARS*****************************************************/
 
 TPacket Packet;
@@ -35,6 +36,8 @@ const uint8_t PACKET_ACK_MASK = 0x80u; //Used to mask out the Acknowledgment bit
 
 uint16union_t volatile *TowerNumber;
 uint16union_t volatile *TowerMode;
+//new
+uint16union_t volatile *charac;
 
 /****************************************PRIVATE FUNCTION DECLARATION***********************************/
 
@@ -203,6 +206,7 @@ void Packet_Handle(void)
 
       //Place the Tower Number packet in the TxFIFO
       Packet_Put(TOWER_NUMBER_COMM, TOWER_NUMBER_PAR1, TowerNumber->s.Lo, TowerNumber->s.Hi); //towerNumberLsb, towerNumberMsb))
+
       error = false;
       break;
 
@@ -266,40 +270,30 @@ void Packet_Handle(void)
 	error = false;
       }
       break;
-//    case SET_TIME:
-//      RTC_Set(Packet_Parameter1, Packet_Parameter2, Packet_Parameter3);
-//      error = false;
-//      break;
-//    case 0x0a:
-//      if (Packet_Parameter1 == 2)
-//      {
-//	Accel_SetMode(ACCEL_POLL);
-//	error = false;
-//	if (Packet_Parameter2 == 0)
-//	{
-//	  Accel_SetMode(ACCEL_POLL);
-//	  error = false;
-//	}
-//	else if(Packet_Parameter2 == 1)
-//	{
-//	  Accel_SetMode(ACCEL_INT);
-//	  error = false;
-//	}
-//      }
-//      else if(Packet_Parameter1 == 1)
-//      {
-//	if(Accel_GetMode() == ACCEL_INT)
-//	{
-//	  Packet_Put(0x0A, 0x0,  1, 0x0);
-//	  error = false;
-//	}
-//	else if(Accel_GetMode() == ACCEL_POLL)
-//	{
-//	  Packet_Put(0x0A, 0x0,  0, 0x0);
-//	  error = false;
-//	}
-//      }
+    case CMD_CHARACTERISTIC:
+      //set characteristic
+      if(Packet_Parameter1 == 0X00 & Packet_Parameter2 == 0X01)
+      {
+          //Sub-Command: Get the Characteristic
+          //Place the characteristic packet in the TxFIFO
+//          Packet_Put(CHAR_COMM, CHAR_PAR1, ,);
+//          error = false;
+      }
+      else if (Packet_Parameter1 == 0X00 & Packet_Parameter2 == 0X02)
+      {
 
+                if(Packet_Parameter3 == 0x01)
+                  characteristic = INVERSE;
+                else if(Packet_Parameter3 == 0x02)
+                  characteristic = VERYINVERSE;
+                else if(Packet_Parameter3 == 0x03)
+                  characteristic = EXTREMELYINVERSE;
+
+                 //WRITE TO FLASH
+//          error = !Flash_Write8((uint16_t volatile *) charac, Packet_Parameter3);//Flash_Write16
+
+      }
+      break;
     default:
       break;
   }

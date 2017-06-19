@@ -17,9 +17,11 @@
 #include "LEDs.h"
 #include "types.h"
 
+OS_ECB *PIT0Semaphore; //Semaphore for PIT Thread
+OS_ECB *PIT1Semaphore; //Semaphore for PIT Thread
 static uint32_t PIT_moduleClk;
-static void * PITArguments; //pointer to userArguments funtion
-static void (*PITCallback)(void *); //pointer to userCallback function
+//static void * PIT0Arguments; //pointer to userArguments funtion
+//static void (*PIT0Callback)(void *); //pointer to userCallback function
 
 /*! @brief Sets up the PIT before first use.
  *
@@ -30,13 +32,14 @@ static void (*PITCallback)(void *); //pointer to userCallback function
  *  @return bool - TRUE if the PIT was successfully initialized.
  *  @note Assumes that moduleClk has a period which can be expressed as an integral number of nanoseconds.
  */
-bool PIT_Init(const uint32_t moduleClk, void (*userFunction)(void*), void* userArguments)
+bool PIT_Init(const uint32_t moduleClk) // second-argument - void (*userFunction)(void*),
 {
 
-  PITSemaphore = OS_SemaphoreCreate(0); //Create PIT Semaphore
+  PIT0Semaphore = OS_SemaphoreCreate(1); //Create PIT Semaphore
+  PIT1Semaphore = OS_SemaphoreCreate(0); //Create PIT Semaphore
 
-  PITArguments = userArguments; //Globally accessible (userArguments)
-  PITCallback = userFunction; //Globally accessible (userFunction)
+//  PIT0Arguments = userArguments; //Globally accessible (userArguments)
+//  PIT0Callback = userFunction; //Globally accessible (userFunction)
   PIT_moduleClk = moduleClk;
 
   SIM_SCGC6 |= SIM_SCGC6_PIT_MASK;  // Enable clock gate PIT
@@ -47,15 +50,21 @@ bool PIT_Init(const uint32_t moduleClk, void (*userFunction)(void*), void* userA
   PIT_MCR |= PIT_MCR_MDIS_MASK;
 
   // Initialise NVICs for PIT | pg 97/2275 k70 manual
-  //IRQ 68(seconds interrupt) mod 32 for channel 0 ??? why channel 0?
+  //IRQ 68(seconds interrupt) mod 32 for channel 0
   NVICICPR2 =  (1 << 4);	 //clears pending  interrupts on PIT channel 0 using IRQ value
   NVICISER2 =  (1 << 4);  //sets/enables interrupts from PIT channel 0
+
+  // Initialise NVICs for PIT | pg 97/2275 k70 manual
+  //IRQ 69(seconds interrupt) mod 32 for channel 1
+  NVICICPR2 =  (1 << 5);   //clears pending  interrupts on PIT channel 1 using IRQ value
+  NVICISER2 =  (1 << 5);  //sets/enables interrupts from PIT channel 1
 
   PIT_MCR &= ~PIT_MCR_MDIS_MASK; //module disable - enabled to allow any kind of setup to PIT
 
   //Enable interrupts
   //PIT_TCTRL0 - Timer Control Register |TIE - Timer Interrupt Enable |pg 1343/2275 k70 manual
   PIT_TCTRL0 |= PIT_TCTRL_TIE_MASK; //enable interrupts for PIT-channel 0
+  PIT_TCTRL1 |= PIT_TCTRL_TIE_MASK; //enable interrupts for PIT-channel 1
 
 
   //PIT_Enable(true);
@@ -70,7 +79,7 @@ bool PIT_Init(const uint32_t moduleClk, void (*userFunction)(void*), void* userA
  *                 FALSE if the PIT will use the new value after a trigger event.
  *  @note The function will enable the timer and interrupts for the PIT.
  */
-void PIT_Set(const uint32_t period, const bool restart)
+void PIT0_Set(const uint32_t period, const bool restart)
 {
   //pg 1346/2275 K70 Manual
   uint32_t  freqHz = 1e9 / period;
@@ -82,8 +91,8 @@ void PIT_Set(const uint32_t period, const bool restart)
 
   if (restart)
   {
-    PIT_Enable(false);
-    PIT_Enable(true);
+    PIT0_Enable(false);
+    PIT0_Enable(true);
   }
 }
 
@@ -91,7 +100,7 @@ void PIT_Set(const uint32_t period, const bool restart)
  *
  *  @param enable - TRUE if the PIT is to be enabled, FALSE if the PIT is to be disabled.
  */
-void PIT_Enable(const bool enable)
+void PIT0_Enable(const bool enable)
 {
   if (enable == true)
   {
@@ -103,17 +112,57 @@ void PIT_Enable(const bool enable)
   }
 }
 
+/*! @brief Sets the value of the desired period of the PIT.
+ *
+ *  @param period The desired value of the timer period in nanoseconds.
+ *  @param restart TRUE if the PIT is disabled, a new value set, and then enabled.
+ *                 FALSE if the PIT will use the new value after a trigger event.
+ *  @note The function will enable the timer and interrupts for the PIT.
+ */
+void PIT1_Set(const uint32_t period, const bool restart)
+{
+  //pg 1346/2275 K70 Manual
+  uint32_t  freqHz = 1e9 / period;
+  uint32_t cycleCount = PIT_moduleClk / freqHz;
+  uint32_t triggerVal = cycleCount - 1;
+
+  //TSV - Timer Start Value.
+  PIT_LDVAL1 = PIT_LDVAL_TSV(triggerVal); //timer LOad Value registers
+
+  if (restart)
+  {
+    PIT1_Enable(false);
+    PIT1_Enable(true);
+  }
+}
+
+/*! @brief Enables or disables the PIT.
+ *
+ *  @param enable - TRUE if the PIT is to be enabled, FALSE if the PIT is to be disabled.
+ */
+void PIT1_Enable(const bool enable)
+{
+  if (enable == true)
+  {
+    PIT_TCTRL1 |= PIT_TCTRL_TEN_MASK;
+  }
+  else
+  {
+    PIT_TCTRL1 &= ~PIT_TCTRL_TEN_MASK;
+  }
+}
+
 /*! @brief Interrupt service routine for the PIT.
  *
  *  The periodic interrupt timer has timed out.
  *  The user callback function will be called.
  *  @note Assumes the PIT has been initialized.
  */
-void __attribute__ ((interrupt)) PIT_ISR(void)
+void __attribute__ ((interrupt)) PIT0_ISR(void)
 {
   OS_ISREnter();
   PIT_TFLG0 |= PIT_TFLG_TIF_MASK; //Acknowledge interrupt
-  OS_SemaphoreSignal(PITSemaphore); //Signal PIT Semaphore
+  OS_SemaphoreSignal(PIT0Semaphore); //Signal PIT Semaphore
   OS_ISRExit();
 
 //  if (PITCallback)
@@ -123,13 +172,25 @@ void __attribute__ ((interrupt)) PIT_ISR(void)
 
 }
 
+/*! @brief Interrupt service routine for the PIT.
+ *
+ *  The periodic interrupt timer has timed out.
+ *  The user callback function will be called.
+ *  @note Assumes the PIT has been initialized.
+ */
+void __attribute__ ((interrupt)) PIT1_ISR(void)
+{
+  OS_ISREnter();
+  PIT_TFLG1 |= PIT_TFLG_TIF_MASK; //Acknowledge interrupt
+  OS_SemaphoreSignal(PIT1Semaphore); //Signal PIT Semaphore
+  OS_ISRExit();
 
+//  if (PITCallback)
+//  {
+//    (*PITCallback)(PITArguments);
+//  }
 
-
-
-
-
-
+}
 
 
 /*!

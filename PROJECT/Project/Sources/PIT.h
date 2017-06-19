@@ -18,8 +18,8 @@
 #include "types.h"
 #include "OS.h"
 
-OS_ECB *PITSemaphore; //Semaphore for PIT Thread
-
+extern OS_ECB *PIT0Semaphore; //Semaphore for PIT Thread
+extern OS_ECB *PIT1Semaphore; //Semaphore for PIT Thread
 /*! @brief Sets up the PIT before first use.
  *
  *  Enables the PIT and freezes the timer when debugging.
@@ -29,7 +29,7 @@ OS_ECB *PITSemaphore; //Semaphore for PIT Thread
  *  @return bool - TRUE if the PIT was successfully initialized.
  *  @note Assumes that moduleClk has a period which can be expressed as an integral number of nanoseconds.
  */
-bool PIT_Init(const uint32_t moduleClk, void (*userFunction)(void*), void* userArguments);
+bool PIT_Init(const uint32_t moduleClk);
 
 /*! @brief Sets the value of the desired period of the PIT.
  *
@@ -38,13 +38,30 @@ bool PIT_Init(const uint32_t moduleClk, void (*userFunction)(void*), void* userA
  *                 FALSE if the PIT will use the new value after a trigger event.
  *  @note The function will enable the timer and interrupts for the PIT.
  */
-void PIT_Set(const uint32_t period, const bool restart);
+void PIT0_Set(const uint32_t period, const bool restart);
 
 /*! @brief Enables or disables the PIT.
  *
  *  @param enable - TRUE if the PIT is to be enabled, FALSE if the PIT is to be disabled.
+ *
  */
-void PIT_Enable(const bool enable);
+void PIT0_Enable(const bool enable);
+
+/*! @brief Sets the value of the desired period of the PIT.
+ *
+ *  @param period The desired value of the timer period in nanoseconds.
+ *  @param restart TRUE if the PIT is disabled, a new value set, and then enabled.
+ *                 FALSE if the PIT will use the new value after a trigger event.
+ *  @note The function will enable the timer and interrupts for the PIT.
+ */
+void PIT1_Set(const uint32_t period, const bool restart);
+
+/*! @brief Enables or disables the PIT.
+ *
+ *  @param enable - TRUE if the PIT is to be enabled, FALSE if the PIT is to be disabled.
+ *
+ */
+void PIT1_Enable(const bool enable);
 
 /*! @brief Interrupt service routine for the PIT.
  *
@@ -52,7 +69,15 @@ void PIT_Enable(const bool enable);
  *  The user callback function will be called.
  *  @note Assumes the PIT has been initialized.
  */
-void __attribute__ ((interrupt)) PIT_ISR(void);
+void __attribute__ ((interrupt)) PIT0_ISR(void);
+
+/*! @brief Interrupt service routine for the PIT.
+ *
+ *  The periodic interrupt timer has timed out.
+ *  The user callback function will be called.
+ *  @note Assumes the PIT has been initialized.
+ */
+void __attribute__ ((interrupt)) PIT1_ISR(void);
 
 /*!
  ** @}
