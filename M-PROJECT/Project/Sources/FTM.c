@@ -29,7 +29,10 @@ static void* FTMArguments[NO_OF_CHANNELS]; //pointer to userArguments function
  */
 bool FTM_Init()
 {
-  FTM0Semaphore = OS_SemaphoreCreate(0); //Create FTM0 Semaphore
+  for (int i = 0; i < FTM_CH_NB; ++i) {
+    FTMSemaphore[i] = OS_SemaphoreCreate(0);
+  }
+  //  FTM0Semaphore = OS_SemaphoreCreate(0); //Create FTM0 Semaphore
 
   SIM_SCGC6 |= SIM_SCGC6_FTM0_MASK;  	// pg 356/2275 k70 -Enable clock gate
   //FTM_SCx = Status and Control -contains the overflow status flag and control bits used to configure the interrupt enable
@@ -43,7 +46,7 @@ bool FTM_Init()
   FTM0_MOD = FTM_MOD_MOD_MASK;				// Initialises FTM counter by writing to CNT
   FTM0_CNT = ~FTM_CNT_COUNT_MASK;			// Checks counter value
   FTM0_SC |= FTM_SC_CLKS(FIXED_FREQUENCY_CLOCK);	// Enable FTM overflow interrupts, up counting mode
-
+  FTM0_SC |= FTM_SC_PS(7); //new - 0x07 set prescaler to 128
 
   // Initialise NVICs for FTM0 | pg 97/2275 k70 manual
   // IRQ = 62 mod 32 = 30.
@@ -130,7 +133,7 @@ bool FTM_StartTimer(const TFTMChannel* const aFTMChannel)
       // If any event on the channel has occurred, clear the channel flag
       if (FTM0_CnSC(aFTMChannel->channelNb) & FTM_CnSC_CHF_MASK)
       {
-	FTM0_CnSC(aFTMChannel->channelNb) &= ~FTM_CnSC_CHF_MASK;
+        FTM0_CnSC(aFTMChannel->channelNb) &= ~FTM_CnSC_CHF_MASK;
       }
 
       //CHIE - channel interrupt enable
@@ -141,6 +144,19 @@ bool FTM_StartTimer(const TFTMChannel* const aFTMChannel)
   }
   return false; //Not successful
 }
+
+//calculates the percentage remain
+int FTM_PercentageRemaining(const TFTMChannel* const aFTMChannel)
+{
+  int remPercent;
+  //finding percent remaining
+  remPercent = ((FTM0_CnV(aFTMChannel->channelNb) - FTM0_CNT) * 100) / FTM0_CnV(aFTMChannel->channelNb);
+
+  return remPercent;
+}
+
+//((FTM0_CnV(channel) - FTM0_CNT )) / FTM0_CnV(channel) = percent remaining
+// the new time = calculated time for the new irms * percentage remaining
 
 void __attribute__ ((interrupt)) FTM0_ISR(void)
 {
@@ -153,22 +169,38 @@ void __attribute__ ((interrupt)) FTM0_ISR(void)
     // Check if interrupt is enabled for channel and Check if the flag is set for that channel
     if ((FTM0_CnSC(channelNb) & FTM_CnSC_CHIE_MASK) && (FTM0_CnSC(channelNb) & FTM_CnSC_CHF_MASK))
     {
+
       FTM0_CnSC(channelNb) &= ~FTM_CnSC_CHF_MASK;
 
       //Disable interrupt
       FTM0_CnSC(channelNb) &= ~FTM_CnSC_CHIE_MASK;
 
-      OS_SemaphoreSignal(FTM0Semaphore); //Signal FTM Semaphore
+
+      if(FTM0_STATUS & FTM_STATUS_CH0F_MASK)
+      {
+        OS_SemaphoreSignal(FTMSemaphore[0]); //Signal FTM Semaphore
+      }
+
+      if(FTM0_STATUS & FTM_STATUS_CH1F_MASK)
+      {
+        OS_SemaphoreSignal(FTMSemaphore[1]); //Signal FTM Semaphore
+      }
+
+      if(FTM0_STATUS & FTM_STATUS_CH2F_MASK)
+      {
+        OS_SemaphoreSignal(FTMSemaphore[2]); //Signal FTM Semaphore
+      }
 
       //Callback function
-//      if (FTMCallback[channelNb])
-//      {
-//	(*FTMCallback[channelNb])(FTMArguments[channelNb]);
-//      }
+      //      if (FTMCallback[channelNb])
+      //      {
+      //	(*FTMCallback[channelNb])(FTMArguments[channelNb]);
+      //      }
     }
   }
   OS_ISRExit();
-}
+        }
+
 
 /*!
  * @}

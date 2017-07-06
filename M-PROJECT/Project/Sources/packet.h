@@ -95,10 +95,10 @@ TCharacteristic characteristic;
 
 #define SET_TIME 0x0C
 
-#define CMD_CHARACTERISTIC 0x0E
-//#define GET_CHAR 1
+#define CMD_CHARACTERISTIC 0x0A
+#define GET_CHAR 1
 
-//#define SET_CHAR 2
+#define SET_CHAR 2
 
 //Get or set the tower number
 #define TOWER_NUMBER 0x0B
@@ -140,7 +140,7 @@ TCharacteristic characteristic;
 #define TOWER_READ_BYTE_COMM 0x08
 
 //Get the characteristic command
-#define CHAR_COMM 0x0e
+#define CHAR_COMM 0x0a
 #define CHAR_PAR1 1
 
 extern TPacket Packet;
@@ -149,7 +149,7 @@ extern TPacket Packet;
 extern const uint8_t PACKET_ACK_MASK;
 
 //extern uint8_t towerNumberLsb, towerNumberMsb;
-extern uint16union_t volatile *TowerNumber, *TowerMode;
+extern uint16union_t volatile *TowerNumber, *TowerMode, *charac;
 
 /*************************************************PUBLIC FUNCTION DECLARATION*************************************************/
 

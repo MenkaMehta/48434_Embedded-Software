@@ -18,7 +18,9 @@
 #include "types.h"
 #include "OS.h"
 
-OS_ECB *FTM0Semaphore; //Semaphore for FTM Thread
+#define FTM_CH_NB 3
+
+OS_ECB *FTMSemaphore[3]; //Semaphore for FTM Thread
 
 typedef enum
 {
@@ -89,14 +91,15 @@ bool FTM_Set(const TFTMChannel* const aFTMChannel);
  */
 bool FTM_StartTimer(const TFTMChannel* const aFTMChannel);
 
-
+int FTM_PercentageRemaining(const TFTMChannel* const aFTMChannel);
 /*! @brief Interrupt service routine for the FTM.
  *
  *  If a timer channel was set up as output compare, then the user callback function will be called.
  *  @note Assumes the FTM has been initialized.
  */
 void __attribute__ ((interrupt)) FTM0_ISR(void);
-
+//void __attribute__ ((interrupt)) FTM1_ISR(void);
+//void __attribute__ ((interrupt)) FTM2_ISR(void);
 /*!
  * @}
  */

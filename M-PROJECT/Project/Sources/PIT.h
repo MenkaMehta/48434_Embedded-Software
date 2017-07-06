@@ -19,7 +19,7 @@
 #include "OS.h"
 
 extern OS_ECB *PIT0Semaphore; //Semaphore for PIT Thread
-extern OS_ECB *PIT1Semaphore; //Semaphore for PIT Thread
+//extern OS_ECB *PIT1Semaphore; //Semaphore for PIT Thread
 /*! @brief Sets up the PIT before first use.
  *
  *  Enables the PIT and freezes the timer when debugging.
@@ -54,14 +54,14 @@ void PIT0_Enable(const bool enable);
  *                 FALSE if the PIT will use the new value after a trigger event.
  *  @note The function will enable the timer and interrupts for the PIT.
  */
-void PIT1_Set(const uint32_t period, const bool restart);
+//void PIT1_Set(const uint32_t period, const bool restart);
 
 /*! @brief Enables or disables the PIT.
  *
  *  @param enable - TRUE if the PIT is to be enabled, FALSE if the PIT is to be disabled.
  *
  */
-void PIT1_Enable(const bool enable);
+//void PIT1_Enable(const bool enable);
 
 /*! @brief Interrupt service routine for the PIT.
  *
@@ -77,7 +77,7 @@ void __attribute__ ((interrupt)) PIT0_ISR(void);
  *  The user callback function will be called.
  *  @note Assumes the PIT has been initialized.
  */
-void __attribute__ ((interrupt)) PIT1_ISR(void);
+//void __attribute__ ((interrupt)) PIT1_ISR(void);
 
 /*!
  ** @}

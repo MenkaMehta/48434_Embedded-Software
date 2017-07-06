@@ -144,9 +144,9 @@ bool Packet_Get(void) {
 
       if (PacketTest())
       {
-	packet_position = 0;
-	//ExitCritical();
-	return true; //Return true, complete packet
+        packet_position = 0;
+        //ExitCritical();
+        return true; //Return true, complete packet
       }
       //The Checksum doesn't match
       //Shift the packets down
@@ -165,7 +165,7 @@ bool Packet_Get(void) {
       break;
   }
 
- // ExitCritical();
+  // ExitCritical();
   return false;
 }
 
@@ -207,6 +207,9 @@ void Packet_Handle(void)
       //Place the Tower Number packet in the TxFIFO
       Packet_Put(TOWER_NUMBER_COMM, TOWER_NUMBER_PAR1, TowerNumber->s.Lo, TowerNumber->s.Hi); //towerNumberLsb, towerNumberMsb))
 
+      //new - not sure
+//      Packet_Put(CHAR_COMM, CHAR_PAR1, characteristic , 0X0);
+
       error = false;
       break;
 
@@ -220,34 +223,34 @@ void Packet_Handle(void)
 
       if (Packet_Parameter1 == TOWER_NUMBER_GET)
       {
-	//Sub-Command: Get the Tower Number
-	//Place the Tower Number packet in the TxFIFO
-	Packet_Put(TOWER_NUMBER_COMM, TOWER_NUMBER_PAR1, TowerNumber->s.Lo, TowerNumber->s.Hi);
-	error = false;
+        //Sub-Command: Get the Tower Number
+        //Place the Tower Number packet in the TxFIFO
+        Packet_Put(TOWER_NUMBER_COMM, TOWER_NUMBER_PAR1, TowerNumber->s.Lo, TowerNumber->s.Hi);
+        error = false;
 
       } else if (Packet_Parameter1 == TOWER_NUMBER_SET)
       {
-	//Sub-Command: Set the Tower Number
-	uint16union_t temp;
-	temp.s.Hi = Packet_Parameter3;
-	temp.s.Lo = Packet_Parameter2;
-	error = !Flash_Write16((uint16_t volatile *) TowerNumber, temp.l);
+        //Sub-Command: Set the Tower Number
+        uint16union_t temp;
+        temp.s.Hi = Packet_Parameter3;
+        temp.s.Lo = Packet_Parameter2;
+        error = !Flash_Write16((uint16_t volatile *) TowerNumber, temp.l);
       }
       break;
     case GET_TOWER_MODE:
       if (Packet_Parameter1 == TOWER_MODE_GET)
       {
-	//Sub-Command: Get Tower Mode
-	Packet_Put(TOWER_MODE_COMM, TOWER_MODE_PAR1, TowerMode->s.Lo, TowerMode->s.Hi);
-	error = false;
+        //Sub-Command: Get Tower Mode
+        Packet_Put(TOWER_MODE_COMM, TOWER_MODE_PAR1, TowerMode->s.Lo, TowerMode->s.Hi);
+        error = false;
       }
       else if (Packet_Parameter1 == TOWER_MODE_SET)
       {
-	//Sub-Command: Set Tower Mode (In flash)
-	uint16union_t temp;
-	temp.s.Hi = Packet_Parameter3;
-	temp.s.Lo = Packet_Parameter2;
-	error = !Flash_Write16((uint16_t volatile *) TowerMode, temp.l);
+        //Sub-Command: Set Tower Mode (In flash)
+        uint16union_t temp;
+        temp.s.Hi = Packet_Parameter3;
+        temp.s.Lo = Packet_Parameter2;
+        error = !Flash_Write16((uint16_t volatile *) TowerMode, temp.l);
       }
       break;
     case FLASH_PROGRAM_BYTE:
@@ -255,42 +258,43 @@ void Packet_Handle(void)
       if(Packet_Parameter1 > 8) error = true;
       if(Packet_Parameter1 == 8) error = !Flash_Erase();
       else {
-	uint8_t *tempAdr = (uint8_t *)(FLASH_DATA_START + Packet_Parameter1);
-	error = !Flash_Write8((uint8_t volatile *) tempAdr, Packet_Parameter3);
+        uint8_t *tempAdr = (uint8_t *)(FLASH_DATA_START + Packet_Parameter1);
+        error = !Flash_Write8((uint8_t volatile *) tempAdr, Packet_Parameter3);
       }
       break;
     case FLASH_READ_BYTE:
       //check that the address is within boundaries
       if (Packet_Parameter1 < 0 || Packet_Parameter1 > 7) error = true;
       else{
-	//Access single byte of flash data
-	uint8_t * const byte;
-	*byte = _FB(FLASH_DATA_START + Packet_Parameter1);
-	Packet_Put(TOWER_READ_BYTE_COMM, Packet_Parameter1, 0x0, *byte);
-	error = false;
+        //Access single byte of flash data
+        uint8_t * const byte;
+        *byte = _FB(FLASH_DATA_START + Packet_Parameter1);
+        Packet_Put(TOWER_READ_BYTE_COMM, Packet_Parameter1, 0x0, *byte);
+        error = false;
       }
       break;
     case CMD_CHARACTERISTIC:
       //set characteristic
-      if(Packet_Parameter1 == 0X00 & Packet_Parameter2 == 0X01)
+      if(Packet_Parameter1 == GET_CHAR) //Packet_Parameter1 == 0X00 & Packet_Parameter2 == 0X01 //GET_CHAR == 1
       {
-          //Sub-Command: Get the Characteristic
-          //Place the characteristic packet in the TxFIFO
-//          Packet_Put(CHAR_COMM, CHAR_PAR1, ,);
-//          error = false;
+        //Sub-Command: Get the Characteristic
+        //Place the characteristic packet in the TxFIFO
+         Packet_Put(CHAR_COMM, CHAR_PAR1, characteristic , 0X0);
+         error = false;
       }
-      else if (Packet_Parameter1 == 0X00 & Packet_Parameter2 == 0X02)
+      else if (Packet_Parameter1 == SET_CHAR) //Packet_Parameter1 == 0X00 & Packet_Parameter2 == 0X02 //SET_CHAR == 2
       {
 
-                if(Packet_Parameter3 == 0x01)
-                  characteristic = INVERSE;
-                else if(Packet_Parameter3 == 0x02)
-                  characteristic = VERYINVERSE;
-                else if(Packet_Parameter3 == 0x03)
-                  characteristic = EXTREMELYINVERSE;
+        if(Packet_Parameter2 == 0x01)
+          characteristic = INVERSE;
+        else if(Packet_Parameter2 == 0x02)
+          characteristic = VERYINVERSE;
+        else if(Packet_Parameter2 == 0x03)
+          characteristic = EXTREMELYINVERSE;
 
-                 //WRITE TO FLASH
-//          error = !Flash_Write8((uint16_t volatile *) charac, Packet_Parameter3);//Flash_Write16
+        //WRITE TO FLASH
+        error = !Flash_Write8((uint8_t volatile *) charac, characteristic);//Flash_Write16
+        //!Flash_Write16((uint16_t volatile *) TowerNumber, temp.l);
 
       }
       break;
