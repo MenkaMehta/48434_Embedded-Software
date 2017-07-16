@@ -48,7 +48,7 @@
 
   * Please refer to the Project Description PDF
   * Status          : Incomplete
-  * Mark            : ?/40
+  * Mark            : xx/40
   * Processor       : MK70FN1M0VMJ12
   * Microcontroller : Freescale Tower
     
